@@ -62,5 +62,14 @@ RSpec.describe "Active Record WITH CTE tables" do
     it "generates an expression with recursive" do
       expect(with_recursive).to match_regex(with_recursive_personal_query)
     end
+
+    it "will maintain the CTE table when merging" do
+      query = User.all
+                .merge(User.with.recursive(personal_id_one: User.where(personal_id: 1)))
+                .joins("JOIN personal_id_one ON personal_id_one.id = users.id")
+                .to_sql
+
+      expect(query).to match_regex(with_recursive_personal_query)
+    end
   end
 end
